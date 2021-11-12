@@ -8,12 +8,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import javax.swing.*;
 
 public class Interface extends JFrame implements ActionListener {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final JPanel body = new JPanel();
@@ -78,12 +80,12 @@ public class Interface extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource().equals(button)) {
+        if (e.getSource().equals(button)) {
             this.processingDirectory();
         } else if (e.getSource().equals(exit)) {
-            if(isRunning) {
-                if(JOptionPane.showConfirmDialog(this, "操作执行中, 是否继续关闭?", "警告", JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE) == 0) {
+            if (isRunning) {
+                if (JOptionPane.showConfirmDialog(this, "操作执行中, 是否继续关闭?", "警告", JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE) == 0) {
                     dispose();
                 }
             } else {
@@ -99,8 +101,8 @@ public class Interface extends JFrame implements ActionListener {
     protected void processWindowEvent(WindowEvent e) {
         if (e.getID() == WindowEvent.WINDOW_CLOSING) {
             if (isRunning) {
-                if(JOptionPane.showConfirmDialog(this, "操作执行中, 是否继续关闭?", "警告", JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE) == 0) {
+                if (JOptionPane.showConfirmDialog(this, "操作执行中, 是否继续关闭?", "警告", JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE) == 0) {
                     dispose();
                 } else {
                     return;
@@ -112,10 +114,11 @@ public class Interface extends JFrame implements ActionListener {
         super.processWindowEvent(e); //该语句会执行窗口事件的默认动作(如：隐藏)
     }
 
-        private void processingDirectory() {
+    private void processingDirectory() {
         int i = chooser.showOpenDialog(null);
         if (i != 1) {
             File file = chooser.getSelectedFile();
+            // 将选中的文件路径放置在界面上
             path.setText(file.getAbsolutePath());
         }
     }
@@ -129,13 +132,14 @@ public class Interface extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(this, "未指定路径");
             return;
         }
-        // 判断路径
+
+        // 判断路径是不是一个文件夹
         File file = new File(dirPath);
-        if(!file.exists()) {
+        if (!file.exists()) {
             JOptionPane.showMessageDialog(this, "该路径不存在");
             return;
         }
-        if(!file.isDirectory()) {
+        if (!file.isDirectory()) {
             JOptionPane.showMessageDialog(this, "指定的路径不是一个文件夹");
             return;
         }
@@ -147,7 +151,7 @@ public class Interface extends JFrame implements ActionListener {
         // 询问是否进行删除操作
         if (enableDel || delEmpty) {
             if (JOptionPane.showConfirmDialog(this, "确认进行删除操作吗?", "警告", JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE) != 0) {
+                    JOptionPane.WARNING_MESSAGE) != 0) {
                 JOptionPane.showMessageDialog(this, "本次操作取消");
                 return;
             }
@@ -168,12 +172,16 @@ public class Interface extends JFrame implements ActionListener {
                 return 1;
             }
         });
+
+        // 异步任务，防止程序无响应
         future.thenAccept(unused -> {
             isRunning = false;
             label.setText(" ");
-            if(unused == 0) {
+            if (unused == 0) {
                 JOptionPane.showMessageDialog(this, "操作已完成\n日志路径为: " + new File(outPath + "out.log").getAbsolutePath());
             }
+
+            // 执行完后调用一次GC
             System.gc();
         });
 

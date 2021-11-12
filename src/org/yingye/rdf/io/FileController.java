@@ -18,6 +18,7 @@ public class FileController {
     // 要检查的目录
     private final File dir;
     private final BufferedWriter bw;
+    // 状态回调, 在界面上显示现在在处理的文件名
     private final Consumer<String> cb;
 
     public FileController(File dir, String logPath, Boolean df, Boolean dr, Consumer<String> cb) throws FileNotFoundException {
@@ -119,7 +120,7 @@ public class FileController {
                     onlyRemoveEmptyDirectory(file);
                 }
             }
-            if(Objects.requireNonNull(target.listFiles()).length==0) {
+            if (Objects.requireNonNull(target.listFiles()).length == 0) {
                 boolean delete = target.delete();
                 if (delete) {
                     bw.write("文件夹删除成功 " + target.getAbsolutePath() + "\n");
